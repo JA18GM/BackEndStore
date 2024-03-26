@@ -81,13 +81,23 @@ import pool from "../config/connection";
 //import model from "../models/usuarioModel";
 
 class UsuarioController {
+
   public async list(req: Request, res: Response) {
     try {
-      return res.json({ message: "Listado de Usuario", code: 0 });
+      const users = await pool.then(async (connection) => {
+        return await connection.query("SELECT * FROM apliweb.tbl_usuario");
+      });
+
+      if (users.length === 0) {
+        return res.status(404).json({ message: "No hay usuarios encontrados", code: 404 });
+      }
+
+      return res.json({ message: "Listado de usuarios", users, code: 200 });
     } catch (error: any) {
-      return res.status(500).json({ message: `${error.message}` });
+      return res.status(500).json({ message: `${error.message}`, code: 500 });
     }
   }
+
 
   /*public async add(req: Request, res: Response) {
     try {
@@ -124,19 +134,9 @@ class UsuarioController {
         role: req.body.role,
       };
 
-      // Verifica si el correo electrónico ya está en uso
-      const existingUser = await pool.then(async (connection) => {
-        const [rows] = await connection.query(
-          "SELECT * FROM tbl_usuario WHERE email = ?",
-          [usuario.email]
-        );
-        return rows && rows.length > 0 ? rows[0] : null;
-      });
-
-      if (existingUser) {
-        return res
-          .status(400)
-          .json({ message: "El correo electrónico ya está en uso" });
+      // Validar que no haya campos vacíos
+      if (!usuario.email || !usuario.password || !usuario.role) {
+        return res.status(400).json({ message: "Todos los campos son obligatorios", code: 400 });
       }
 
       // Encripta el password si existe
@@ -145,18 +145,13 @@ class UsuarioController {
       }
 
       // Inserta el usuario en la base de datos
-      console.log("Email " + usuario.email);
-      console.log("Password " + usuario.password);
-      console.log("Role " + usuario.role);
       const result = await pool.then(async (connection) => {
-        return await connection.query("INSERT INTO tbl_usuario SET ? ", [
-          usuario,
-        ]);
+        return await connection.query("INSERT INTO tbl_usuario SET ?", [usuario]);
       });
 
-      return res.json({ message: "Agregado con éxito" });
+      return res.json({ message: "Usuario agregado con éxito", code: 200 });
     } catch (error: any) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: `${error.message}`, code: 500 });
     }
   }
 
@@ -189,46 +184,46 @@ class UsuarioController {
     }
   }*/public async update(req: Request, res: Response) {
     try {
-      
       const usuario = {
           email: req.body.email,
           password: req.body.password,
           role: req.body.role,
       };
 
+      console.log(usuario.email);
+
       // Verifica si el usuario existe
       const existingUser = await pool.then(async (connection) => {
-          const [rows] = await connection.query(
+          return await connection.query(
               "SELECT * FROM tbl_usuario WHERE email = ?",
               [usuario.email]
           );
-          return rows && rows.length > 0 ? rows[0] : null;
       });
 
-      if(!existingUser){
-        return res.status(404).json({message:"no pues no"});
+      console.log(existingUser);
+
+      // Verifica si el usuario existe antes de actualizarlo
+      if (existingUser && existingUser.length > 0) {
+          // Actualiza el usuario en la base de datos
+          const updateQuery = "UPDATE tbl_usuario SET email = ?, password = ?, role = ? WHERE email = ?";
+          await pool.then(async (connection) => {
+              await connection.query(updateQuery, [
+                  usuario.email,
+                  usuario.password,
+                  usuario.role,
+                  usuario.email // Utilizamos el campo 'email' para identificar al usuario en la actualización
+              ]);
+          });
+
+          return res.json({ message: "Usuario actualizado con éxito", code: 0 });
+      } else {
+          return res.status(404).json({ message: "Usuario no encontrado" });
       }
-
-      //if (!existingUser) {
-      //    return res.status(404).json({ message: "Usuario no encontrado" });
-      //}
-
-      // Actualiza el usuario en la base de datos
-      const updateQuery = "UPDATE tbl_usuario SET email = ?, password = ?, role = ? WHERE email = ?";
-      const result = await pool.then(async (connection) => {
-          return await connection.query(updateQuery, [
-              usuario.email,
-              usuario.password,
-              usuario.role,
-              usuario.email // Utilizamos el campo 'email' para identificar al usuario en la actualización
-          ]);
-      });
-
-      return res.json({ message: "Usuario actualizado con éxito", code: 0 });
   } catch (error: any) {
       return res.status(500).json({ message: `${error.message}` });
   }
 }
+
 
 
 public async delete(req: Request, res: Response) {
