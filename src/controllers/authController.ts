@@ -94,5 +94,6 @@ class AuthController {
             return res.status(500).json({ message: '${error.message}' });
         }
     }
+    
 }
 export const authController = new AuthController();

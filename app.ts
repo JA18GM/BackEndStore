@@ -4,6 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import authRoutes from "./src/routes/authRoutes";
 import usuarioRoutes from "./src/routes/usuarioRoutes";
+import productosRoutes from './src/routes/productosRoutes';
 
 //import authRoutes from "./routes/authRoutes";
 const app=express();
@@ -33,23 +34,18 @@ class Server{
         })
      }
 
-     config():void{
-        //configuracion del puerto
-        this.app.set("port",3000);
-
+     config(): void {
         this.app.use(morgan("dev"));
-
         this.app.use(cors());
-
         this.app.use(bodyParser.json());
+        this.app.use(bodyParser.urlencoded({ extended: false }));
+    }
 
-        this.app.use(bodyParser.urlencoded({extended:false,}))
-        //this.app.use(bodyParser.urlencoded(({extended:false,})),
-     }
+    routes() {
+        this.app.use("/", authRoutes);
+        this.app.use("/usuario", usuarioRoutes);
+        this.app.use("/productos", productosRoutes);
+    }
 
-     routes(){
-        this.app.use("/", authRoutes)
-        this.app.use("/usuario", usuarioRoutes)
-     }
 }
  const server = new Server();

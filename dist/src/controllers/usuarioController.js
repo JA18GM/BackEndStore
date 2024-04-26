@@ -192,7 +192,6 @@ class UsuarioController {
             }
         });
     }
-    // Aquí se agrega el código proporcionado
     login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

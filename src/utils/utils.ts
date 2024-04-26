@@ -20,7 +20,7 @@ class Utils {
         return await bcript.compareSync(password, encryptedPassword);
     }
 
-
+    
 }
 
 

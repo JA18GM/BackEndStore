@@ -12,14 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//import pool from '../utils/connection';
 const connection_1 = __importDefault(require("../config/connection"));
 class UsuarioModelo {
+    constructor() { }
+    findOne(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield connection_1.default.then((connection) => __awaiter(this, void 0, void 0, function* () {
+                return yield connection.query("SELECT email, password, role FROM tbl_usuario WHERE email = ?", [email]);
+            }));
+            // Retorna el usuario encontrado o null si no existe
+            return result[0][0] || null;
+        });
+    }
     list() {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield connection_1.default.then((connection) => __awaiter(this, void 0, void 0, function* () {
-                return yield connection.query(" SELECT u.email, u.password, u.role "
-                    + " FROM tbl_usuario u ");
+                return yield connection.query("SELECT email, password, role FROM tbl_usuario");
             }));
             return result;
         });
@@ -27,7 +35,7 @@ class UsuarioModelo {
     add(usuario) {
         return __awaiter(this, void 0, void 0, function* () {
             // Verificar si ya existe un usuario con el mismo correo electrónico
-            const existingUser = yield this.findUserByEmail(usuario.email);
+            const existingUser = yield this.findOne(usuario.email);
             if (existingUser !== null) {
                 // Si existe un usuario con el mismo correo electrónico, lanzar un error
                 throw new Error("Ya existe un usuario con este correo electrónico.");
@@ -55,7 +63,7 @@ class UsuarioModelo {
     delete(email) {
         return __awaiter(this, void 0, void 0, function* () {
             // Verificar si el usuario existe
-            const existingUser = yield this.findUserByEmail(email);
+            const existingUser = yield this.findOne(email);
             if (existingUser === null) {
                 // Si el usuario no existe, lanzar un error
                 throw new Error("El usuario no existe.");
@@ -69,10 +77,6 @@ class UsuarioModelo {
             }
         });
     }
-    findUserByEmail(email) {
-        throw new Error("Method not implemented.");
-    }
 }
-const model = new UsuarioModelo();
-exports.default = model;
+exports.default = UsuarioModelo;
 //# sourceMappingURL=usuarioModel.js.map

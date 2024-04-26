@@ -244,7 +244,7 @@ public async delete(req: Request, res: Response) {
   } catch (error: any) {
       return res.status(500).json({ message: `${error.message}` });
   }
-}
+  } 
   /*public async delete(req: Request, res: Response) {
     try {
       const email = req.body.email;
@@ -269,7 +269,6 @@ public async delete(req: Request, res: Response) {
     }
   }
 
-  // Aquí se agrega el código proporcionado
   public async login(req: Request, res: Response) {
     try {
       const lsUsers: any[] = []; // Supongamos que lsUsers es un arreglo de usuarios obtenido de alguna fuente
@@ -287,5 +286,5 @@ public async delete(req: Request, res: Response) {
       return res.status(500).json({ message: `${error.message}` });
     }
   }
-}
+ }
 export const usuarioController = new UsuarioController();
